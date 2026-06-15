@@ -167,7 +167,7 @@ export class SceneEngine {
 
   _onBuffer(ping) {
     this.latestROV = { quat: ping.rov.quat.slice(), pos: ping.rov.pos.slice() };
-    this.sonar.pushPing(ping, this.t);
+    this.sonar.pushPing(ping);
   }
 
   _onResize() {

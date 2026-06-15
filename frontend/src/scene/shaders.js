@@ -8,9 +8,9 @@ export const SONAR_VERTEX_SHADER = `
   void main() {
     vColor = instColor;
     vAlpha = instAlpha;
-    vec3 pos = position * instSize;
-    vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vDepth = -mvPosition.z;
+    gl_PointSize = clamp(instSize * (300.0 / max(0.1, vDepth)), 1.0, 18.0);
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
