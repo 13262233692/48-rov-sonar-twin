@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ROVModel } from './ROVModel.js';
 import { SonarCloud } from './SonarCloud.js';
+import { CavityPatcher } from './CavityPatcher.js';
 
 export class SceneEngine {
   constructor(canvas, dataBuffer) {
@@ -142,6 +143,7 @@ export class SceneEngine {
   _initObjects() {
     this.rov = new ROVModel(this.scene);
     this.sonar = new SonarCloud(this.scene, { maxInstances: 256 * 1200 });
+    this.patcher = new CavityPatcher(this.scene);
   }
 
   _bindInput() {
@@ -168,6 +170,7 @@ export class SceneEngine {
   _onBuffer(ping) {
     this.latestROV = { quat: ping.rov.quat.slice(), pos: ping.rov.pos.slice() };
     this.sonar.pushPing(ping);
+    this.patcher.pushPing(ping, this.t);
   }
 
   _onResize() {
@@ -208,6 +211,7 @@ export class SceneEngine {
     this.cameraRig.position.lerp(new THREE.Vector3(cx, cy, cz), 1 - Math.pow(0.0005, dt));
     this.camera.lookAt(this._targetLook);
     this.sonar.updateFade(dt);
+    this.patcher.update(dt);
   }
 
   getStatus() {
@@ -218,7 +222,11 @@ export class SceneEngine {
     };
   }
 
-  clearSonar() { this.sonar.clearAll(); this.dataBuffer.clear(); }
+  clearSonar() {
+    this.sonar.clearAll();
+    this.patcher.clear();
+    this.dataBuffer.clear();
+  }
 
   stop() {
     this.running = false;
@@ -230,6 +238,7 @@ export class SceneEngine {
     this.stop();
     this.rov.dispose();
     this.sonar.dispose();
+    this.patcher.dispose();
     this.renderer.dispose();
   }
 }
